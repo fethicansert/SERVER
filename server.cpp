@@ -29,17 +29,24 @@ int main()
 		strcpy(name,sp);
 		sp=strtok(NULL," ");
 		strcpy(password,sp);
-		printf("%s %s",name,password);	
+		
 		
 		while(fgets(line,100,file)!=NULL)
     	{
     		
     		sp=strtok(line,":");
     		strcpy(t_name,sp);
-    		sp=strtok(NULL," ");
+    		sp=strtok(NULL,"\t");
     		strcpy(t_password,sp);
     		
-    		//ssss
+    		
+    		if(strcmp(name,t_name)==0 && strcmp(password,t_password))
+    		{
+		
+    			
+    			printf("200  User %s  has grated to access",name);
+    			break;
+			}
     		
     		
     

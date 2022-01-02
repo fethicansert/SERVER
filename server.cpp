@@ -15,13 +15,12 @@ int main()
 	char password[21];
 	char t_name[21];
 	char t_password[21];
-	bool enter=true;
+	bool enter=false;
 	char *sp;
 	FILE *file;
 	file=fopen("12.txt","r");
 	
-	while(enter)
-	{
+
 	
 	printf("Enter Command : ");
 	memset( &commandline, '\0', sizeof(commandline) );
@@ -51,12 +50,16 @@ int main()
     		{
     			printf("200  User %s  has grated to access",name);
     			scanf("%s",name1);
-    			enter=false;
+    			enter=true;
     			break;
 			}
 			
     	
-		}			
+		}
+		if(enter==false)
+			printf("Wrong UserName or PassWord !!!");
+			
+								
 	}
 	else if(strcmp(command,"QUIT")==0)
 	{
@@ -68,7 +71,7 @@ int main()
 		printf("WRONG COMMAND");
 	}
 	
-}
+
 	fclose(file);
 	
 	

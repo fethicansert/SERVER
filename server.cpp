@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h> 
 
 
 using namespace std;
@@ -21,9 +22,10 @@ int main()
 	file=fopen("12.txt","r");
 	
 
+
 	
-	printf("Enter Command : ");
-	memset( &commandline, '\0', sizeof(commandline) );
+	printf("HELLO WELCOME THE FETHI's SERVER \n ");
+	memset( &commandline, '\0', sizeof(commandline));
     scanf("%20[^\n]",&commandline); //%20[^\n]
 	sp=strtok(commandline," ");
 	strcpy(command,sp);
@@ -49,7 +51,6 @@ int main()
     		if(strcmp(password,t_password)==0 && strcmp(name,t_name)==0)
     		{
     			printf("200  User %s  has grated to access",name);
-    			scanf("%s",name1);
     			enter=true;
     			break;
 			}
@@ -57,24 +58,40 @@ int main()
     	
 		}
 		if(enter==false)
-			printf("Wrong UserName or PassWord !!!");
+			printf("400 User Not Found Wrong UserName or PassWord !!!");
 			
 								
 	}
 	else if(strcmp(command,"QUIT")==0)
 	{
-		printf("TRUE COMMAND");
+		printf("SERVER CLOSING");
 	}
 	else
 	{
 		
 		printf("WRONG COMMAND");
 	}
+	if(enter)
+	{
+		 scanf("%s",&name1);
+		 if(strcmp(name1,"LIST")==0)
+		 {
+		 DIR *d;
+         struct dirent *dir;
+         d = opendir(".");
+         if (d) {
+                  while ((dir = readdir(d)) != NULL) {
+                  printf("%s\n", dir->d_name);
+               }
+                  closedir(d);
+               }
+		
+	}
+	
+}
 	
 
 	fclose(file);
-	
-	
 	
 }
 

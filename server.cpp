@@ -4,6 +4,7 @@
 #include <dirent.h> 
 
 
+
 using namespace std;
 
 int main()
@@ -24,11 +25,21 @@ int main()
 
 
 	
+	
 	printf("HELLO WELCOME THE FETHI's SERVER \n ");
-	memset( &commandline, '\0', sizeof(commandline));
-    scanf("%20[^\n]",&commandline); //%20[^\n]
+	while(1)
+	{
+		
+
+	
+	
+    gets(commandline);
+    printf("%s\n",commandline);
+     //scanf("%20[^\n]",&commandline); //%20[^\n]
 	sp=strtok(commandline," ");
+	printf("%s\n",commandline);
 	strcpy(command,sp);
+	printf("%s\n",command);
 	if(strcmp(command,"USER")==0)
 	{
 		sp=strtok(NULL," ");
@@ -50,15 +61,19 @@ int main()
     		
     		if(strcmp(password,t_password)==0 && strcmp(name,t_name)==0)
     		{
-    			printf("200  User %s  has grated to access",name);
-    			enter=true;
+    			
+    			char name1[200];
+    			memset(&name1,'\0',sizeof(name1));
+    			sprintf(name1,"200 USER %s to access. \n",name1);
+    			send(fd,name1,200,0)
     			break;
+    			
 			}
 			
     	
 		}
-		if(enter==false)
-			printf("400 User Not Found Wrong UserName or PassWord !!!");
+		
+		
 			
 								
 	}
@@ -69,7 +84,7 @@ int main()
 	else
 	{
 		
-		printf("WRONG COMMAND");
+		printf("WRONG COMMAND\n");
 	}
 	if(enter)
 	{
@@ -89,9 +104,8 @@ int main()
 	}
 	
 }
-	
-
-	fclose(file);
+		
+}
 	
 }
 

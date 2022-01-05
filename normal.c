@@ -11,6 +11,7 @@ For compile code : # gcc prog.name.c -o execfile
 #include <stdbool.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 /* Socket API headers */
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,7 +21,7 @@ For compile code : # gcc prog.name.c -o execfile
 #define DEFAULT_BUFLEN 512
 #define PORT 8080
 
-int main()
+int main(int argc,char *argv[])
 {
 int gul_counter=1;
 bool usercommand=false;	
@@ -41,6 +42,44 @@ struct sockaddr_in remote_addr;
 int length,fd,rcnt,optval;
 char recvbuf[DEFAULT_BUFLEN],bmsg[DEFAULT_BUFLEN];
 int  recvbuflen = DEFAULT_BUFLEN;
+int c;
+int  port;
+char fileopt[20];
+char diropt[20];
+while( (c=getopt(argc,argv,"d:p:u:")) != -1)
+{
+	switch(c)
+	{
+		case 'd':
+			sprintf(diropt,"%s",optarg);
+			break;
+
+
+
+		case 'p':
+			port=atoi(optarg);
+			break;
+
+
+		case 'u':
+		        sprintf(fileopt,"%s",optarg);
+		        break;
+
+		
+				       	
+
+		case '?':
+		    if(optopt == 'p')
+		         fprintf(stderr,"Option -%c needs argument\n",optopt);
+
+	                 break;	    
+	
+	}
+
+
+
+
+}
 
 
 
@@ -57,7 +96,7 @@ memset( &remote_addr, 0, sizeof(remote_addr) );
 /* Set values to local_addr structure */
 local_addr.sin_family = AF_INET;
 local_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-local_addr.sin_port = htons(PORT);
+local_addr.sin_port = htons(port);
 
 // set SO_REUSEADDR on a socket to true (1):
 optval = 1;
@@ -108,7 +147,7 @@ while(1) {  // main accept() loop
 
 			DIR *d;
 			struct dirent *dir;
-			d=opendir(".");
+			d=opendir(diropt);
 			if(d){
 				while((dir=readdir(d)) != NULL){
 					char files[300];
@@ -155,6 +194,33 @@ while(1) {  // main accept() loop
 		
 		
 		}
+		else if(strcmp(command,"GET")==0)
+
+		{
+			sp=strtok(NULL,"\n");
+			FILE *file_;
+			char content[1000];
+			memset(&content,'\0',sizeof(content));
+			
+			file_=fopen(sp,"r");
+			if(file_==NULL)
+			{
+				char er1[100];
+				memset(&er1,'\0',sizeof(er1));
+				sprintf(er1,"400 File %s not found!\n",sp);
+				send(fd,er1,100,0);
+
+			
+			}else{
+				while(fgets(content,1000,file_)!=NULL)
+
+				{       
+					send(fd,content,1000,0);
+			         	memset(&content,'\0',sizeof(content));		
+				}
+	                    		fclose(file_);
+			}
+		}
 	
 	
 	}
@@ -165,7 +231,7 @@ while(1) {  // main accept() loop
 		strcpy(name,sp);
 		sp=strtok(NULL,"\n");
 		strcpy(password,sp);
-		file=fopen("password.txt","r");
+		file=fopen(fileopt,"r");
 		enter=true;
 
 		while(fgets(line,100,file)!=NULL)

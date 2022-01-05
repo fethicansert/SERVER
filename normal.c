@@ -46,6 +46,7 @@ int c;
 int  port;
 char fileopt[20];
 char diropt[20];
+bool nocomand;
 while( (c=getopt(argc,argv,"d:p:u:")) != -1)
 {
 	switch(c)
@@ -53,7 +54,6 @@ while( (c=getopt(argc,argv,"d:p:u:")) != -1)
 		case 'd':
 			sprintf(diropt,"%s",optarg);
 			break;
-
 
 
 		case 'p':
@@ -65,19 +65,14 @@ while( (c=getopt(argc,argv,"d:p:u:")) != -1)
 		        sprintf(fileopt,"%s",optarg);
 		        break;
 
-		
-				       	
-
+						    
 		case '?':
-		    if(optopt == 'p')
+		    if(optopt == 'd' || optopt =='p' || optopt =='u')
 		         fprintf(stderr,"Option -%c needs argument\n",optopt);
 
 	                 break;	    
 	
 	}
-
-
-
 
 }
 
@@ -140,10 +135,15 @@ while(1) {  // main accept() loop
         rcnt = recv(fd, recvbuf, recvbuflen, 0);
 	sp=strtok(recvbuf," ");
 	strcpy(command,sp);
+	nocomand=true;
 	if(usercommand)
 	{
+		
+
 		if(strcmp(command,"LIST\n")==0)
-		{
+		 {
+			nocomand=false;
+ 
 
 			DIR *d;
 			struct dirent *dir;
@@ -176,7 +176,8 @@ while(1) {  // main accept() loop
 		
 		}else if(strcmp(command,"DEL")==0)
 
-		{
+		{       
+			nocomand=false;
 			sp=strtok(NULL,"\n");
 			char delete[100];
 			if(remove(sp)==0){
@@ -193,10 +194,17 @@ while(1) {  // main accept() loop
 		
 		
 		
+		}else if(nocomand)
+
+		{
+			char wrongc1[24]="Wrong Command! \n";
+			send(fd,wrongc1,24,0);
+		
+		
 		}
 		else if(strcmp(command,"GET")==0)
 
-		{
+		{       nocomand=false;
 			sp=strtok(NULL,"\n");
 			FILE *file_;
 			char content[1000];
@@ -226,6 +234,7 @@ while(1) {  // main accept() loop
 	}
 	else if(strcmp(command,"USER")==0)
 	{      
+		nocomand=false;
 	       	
 		sp=strtok(NULL," ");
 		strcpy(name,sp);
@@ -255,7 +264,6 @@ while(1) {  // main accept() loop
 			}
 		
 			
-			
 			}
 		if(enter){
 			char ermsg[200]="WRONG NAME OR PASSWORD\n";
@@ -265,11 +273,7 @@ while(1) {  // main accept() loop
 		
 		
 		         fclose(file);
-		
 
-		
-		
-	
 	
           }else if(strcmp(command,"QUIT\n")==0)
 	  {
@@ -288,20 +292,21 @@ while(1) {  // main accept() loop
 		  sprintf(gul,"%d. GULLURİ\n",gul_counter);
 		  send(fd,gul,200,0);
 		  gul_counter++;
+		  nocomand=false;
+	  
+	  }else if(nocomand)
+	  {       
+		  char wrongc[24]="Wrong Command!\n";
+		  send(fd,wrongc,24,0);
+	  
 	  
 	  }
- 		
-		
-		
-	    	 
+	  
+		  
 
-        // Echo the buffer back to the sender
-        
-            
-                
-                
-                
-   
+
+        // Echo the buffer back to the sender   
+
         
     } while (rcnt>0);
 

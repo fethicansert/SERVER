@@ -11,6 +11,7 @@ For compile code : # gcc prog.name.c -o execfile
 #include <stdbool.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 /* Socket API headers */
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -20,7 +21,7 @@ For compile code : # gcc prog.name.c -o execfile
 #define DEFAULT_BUFLEN 512
 #define PORT 8080
 
-int main()
+int main(int argc,char *argv[])
 {
 int gul_counter=1;
 bool usercommand=false;	
@@ -41,6 +42,39 @@ struct sockaddr_in remote_addr;
 int length,fd,rcnt,optval;
 char recvbuf[DEFAULT_BUFLEN],bmsg[DEFAULT_BUFLEN];
 int  recvbuflen = DEFAULT_BUFLEN;
+int c;
+int  port;
+char fileopt[20];
+char diropt[20];
+bool nocomand;
+while( (c=getopt(argc,argv,"d:p:u:")) != -1)
+{
+	switch(c)
+	{
+		case 'd':
+			sprintf(diropt,"%s",optarg);
+			break;
+
+
+		case 'p':
+			port=atoi(optarg);
+			break;
+
+
+		case 'u':
+		        sprintf(fileopt,"%s",optarg);
+		        break;
+
+						    
+		case '?':
+		    if(optopt == 'd' || optopt =='p' || optopt =='u')
+		         fprintf(stderr,"Option -%c needs argument\n",optopt);
+
+	                 break;	    
+	
+	}
+
+}
 
 
 
@@ -57,7 +91,7 @@ memset( &remote_addr, 0, sizeof(remote_addr) );
 /* Set values to local_addr structure */
 local_addr.sin_family = AF_INET;
 local_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-local_addr.sin_port = htons(PORT);
+local_addr.sin_port = htons(port);
 
 // set SO_REUSEADDR on a socket to true (1):
 optval = 1;
@@ -91,6 +125,8 @@ while(1) {  // main accept() loop
             inet_ntoa(remote_addr.sin_addr));
     char welcome[200]="HELLO WELCOME THE GULLURİ SERVER\n";
     send(fd,welcome,200,0);
+    char gulc[200]="PRESS JUST ENTER FOR GUL COUNTER :)\n";
+    send(fd,gulc,200,0);	    
  
  
 
@@ -101,14 +137,19 @@ while(1) {  // main accept() loop
         rcnt = recv(fd, recvbuf, recvbuflen, 0);
 	sp=strtok(recvbuf," ");
 	strcpy(command,sp);
+	nocomand=true;
 	if(usercommand)
 	{
+		
+
 		if(strcmp(command,"LIST\n")==0)
-		{
+		 {
+			nocomand=false;
+ 
 
 			DIR *d;
 			struct dirent *dir;
-			d=opendir(".");
+			d=opendir(diropt);
 			if(d){
 				while((dir=readdir(d)) != NULL){
 					char files[300];
@@ -137,7 +178,8 @@ while(1) {  // main accept() loop
 		
 		}else if(strcmp(command,"DEL")==0)
 
-		{
+		{       
+			nocomand=false;
 			sp=strtok(NULL,"\n");
 			char delete[100];
 			if(remove(sp)==0){
@@ -154,10 +196,10 @@ while(1) {  // main accept() loop
 		
 		
 		
-		}
+		}		
 		else if(strcmp(command,"GET")==0)
 
-		{
+		{       nocomand=false;
 			sp=strtok(NULL,"\n");
 			FILE *file_;
 			char content[1000];
@@ -181,18 +223,26 @@ while(1) {  // main accept() loop
 				}
 	                    		fclose(file_);
 			}
+		}else if(nocomand)
+
+		{
+			char wrongf[21]="Wrong Comman!\n";
+			send(fd,wrongf,21,0);
+		
+		
 		}
 	
 	
 	}
 	else if(strcmp(command,"USER")==0)
 	{      
+		nocomand=false;
 	       	
 		sp=strtok(NULL," ");
 		strcpy(name,sp);
 		sp=strtok(NULL,"\n");
 		strcpy(password,sp);
-		file=fopen("password.txt","r");
+		file=fopen(fileopt,"r");
 		enter=true;
 
 		while(fgets(line,100,file)!=NULL)
@@ -216,7 +266,6 @@ while(1) {  // main accept() loop
 			}
 		
 			
-			
 			}
 		if(enter){
 			char ermsg[200]="WRONG NAME OR PASSWORD\n";
@@ -226,11 +275,7 @@ while(1) {  // main accept() loop
 		
 		
 		         fclose(file);
-		
 
-		
-		
-	
 	
           }else if(strcmp(command,"QUIT\n")==0)
 	  {
@@ -249,20 +294,21 @@ while(1) {  // main accept() loop
 		  sprintf(gul,"%d. GULLURİ\n",gul_counter);
 		  send(fd,gul,200,0);
 		  gul_counter++;
+		  nocomand=false;
+	  
+	  }else if(nocomand)
+	  {       
+		  char wrongc[24]="Wrong Command!\n";
+		  send(fd,wrongc,24,0);
+	  
 	  
 	  }
- 		
-		
-		
-	    	 
+	  
+		  
 
-        // Echo the buffer back to the sender
-        
-            
-                
-                
-                
-   
+
+        // Echo the buffer back to the sender   
+
         
     } while (rcnt>0);
 
